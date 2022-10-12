@@ -229,7 +229,7 @@ final class CachedReader implements Reader
         $parent = $class->getParentClass();
 
         $lastModification =  max(array_merge(
-            [$filename ? filemtime($filename) : 0],
+            [self::getFileMtime($filename)],
             array_map(function (ReflectionClass $reflectionTrait): int {
                 return $this->getTraitLastModificationTime($reflectionTrait);
             }, $class->getTraits()),
@@ -253,7 +253,7 @@ final class CachedReader implements Reader
         }
 
         $lastModificationTime = max(array_merge(
-            [$fileName ? filemtime($fileName) : 0],
+            [self::getFileMtime($fileName)],
             array_map(function (ReflectionClass $reflectionTrait): int {
                 return $this->getTraitLastModificationTime($reflectionTrait);
             }, $reflectionTrait->getTraits())
@@ -262,5 +262,10 @@ final class CachedReader implements Reader
         assert($lastModificationTime !== false);
 
         return $this->loadedFilemtimes[$fileName] = $lastModificationTime;
+    }
+
+    private static function getFileMtime(string $fileName): int
+    {
+        return file_exists($fileName) && is_file($fileName) ? filemtime($fileName) : 0;
     }
 }
